@@ -33,12 +33,12 @@ class Rook(Figure):
           bool: Допустимость хода.
         """
         if start[0] == end[0]: 
-          for y in range(start[1] + 1, end[1]):
-             if board[start[0]][y]:
+          for column in range(start[1] + 1, end[1]):
+             if board[start[0]][column]:
                 return False
         elif start[1] == end[1]: 
-          for x in range(start[0] + 1, end[0]):
-             if board[x][start[1]]:
+          for row in range(start[0] + 1, end[0]):
+             if board[row][start[1]]:
                 return False
         else:
           return False
@@ -67,24 +67,19 @@ class Pawn(Figure):
           bool: Допустимость хода.
         """
         if self.color == 'white':
-          if start[0] == 1 and end[0] == 3 and start[1] == end[1] and not board[2][start[1]] and not board[3][start[1]]:
+          if start[0] == 1 and end[0] == 3 and start[1] == end[1] and not board[2][end[1]] and not board[3][end[1]]:
             return True
-        elif start[0] + 1 == end[0] and start[1] == end[1] and not board[end[0]][end[1]]:
+          elif start[0] + 1 == end[0] and start[1] == end[1] and not board[end[0]][end[1]]:
             return True
         else:
           if start[0] == 6 and end[0] == 4 and start[1] == end[1] and not board[5][start[1]] and not board[4][start[1]]:
             return True
           elif start[0] - 1 == end[0] and start[1] == end[1] and not board[end[0]][end[1]]:
             return True
+        if abs(end[0]-start[0] == 1) and abs(end[1]-start[1]) == 1:
+          if board[end[0]][end[1]] and board[end[0]][end[1]].color != self.color:
+            return True
         return False
-
-        if self.color == 'white':
-          if end[0] == start[0]+1 and abs(end[1]-start[1]) == 1:
-            return board[end[0]][end[1]] and board[end[0]][end[1]].color != self.color
-
-        if self.color == 'black':
-          if end[0] == start[0]+1 and abs(end[1]-start[1]) == 1:
-            return board[end[0]][end[1]] and board[end[0]][end[1]].color != self.color
 
 class Knight(Figure):
     """Конь"""
@@ -108,9 +103,9 @@ class Knight(Figure):
         Returns:
           bool: Допустимость хода.
         """
-        x = abs(start[0] - end[0])
-        y = abs(start[1] - end[1])
-        return (x == 2 and y == 1) or (x == 1 and y == 2)
+        step_1 = abs(start[0] - end[0])
+        step_2 = abs(start[1] - end[1])
+        return (step_1 == 2 and step_2 == 1) or (step_1 == 1 and step_2 == 2)
 
 class Bishop(Figure):
     """Слон"""
@@ -170,9 +165,9 @@ class King(Figure):
         Returns:
           bool: Допустимость хода.
         """
-        dx = abs(start[0] - end[0])
-        dy = abs(start[1] - end[1])
-        return (dx <= 1 and dy <= 1)
+        step_1 = abs(start[0] - end[0])
+        step_2 = abs(start[1] - end[1])
+        return (step_1 <= 1 and step_2 <= 1)
 
 class Queen(Figure):
     """Королева"""
@@ -241,9 +236,9 @@ class Scandic(Figure):
         Returns:
           bool: Допустимость хода.
         """
-        dx = abs(start[0] - end[0])
-        dy = abs(start[1] - end[1])
-        return (dx <= 2 and dy <= 2)
+        step_1 = abs(start[0] - end[0])
+        step_2 = abs(start[1] - end[1])
+        return (step_1 <= 2 and step_2 <= 2)
 
 class Viperr(Figure):
     """Вайперр"""
@@ -295,9 +290,9 @@ class Timur(Figure):
         Returns:
           bool: Допустимость хода.
         """
-        x = abs(start[0] - end[0])
-        y = abs(start[1] - end[1])
-        return (x == 3 and y == 1) or (x == 1 and y == 3)
+        step_1 = abs(start[0] - end[0])
+        step_2 = abs(start[1] - end[1])
+        return (step_1 == 3 and step_2 == 1) or (step_1 == 1 and step_2 == 3)
 
 class Game(object):
     """Игра"""
@@ -344,9 +339,9 @@ class Game(object):
     def display_board(self):
         """Шахматная доска"""
         print("  A B C D E F G H")
-        for i, row in enumerate(self.fields, start=1):
-          print(f"{8 - i + 1} ", end='')  
-          print(' '.join([str(cell.symbol) if cell else '.' for cell in row] + [f" {8 - i + 1}"]))
+        for index, row in enumerate(self.fields, start=1):
+          print(f"{8 - index + 1} ", end='')  
+          print(' '.join([str(cell.symbol) if cell else '.' for cell in row] + [f" {8 - index + 1}"]))
         print("  A B C D E F G H")  
 
     def validate_move(self, start, end):
@@ -454,20 +449,20 @@ class Game(object):
             if king_position:
                 break
             
-def convert_coordinates(x, y):
-    x = ord(x) - ord('A')
-    y = 8 - int(y)
-    return (y, x)
+def convert_coordinates(coord_1, coord_2):
+    coord_1 = ord(coord_1) - ord('A')
+    coord_2 = 8 - int(coord_2)
+    return (coord_2, coord_1)
 
 game = Game()
 
 while True:
     game.display_board()
-    start_x = input('x: which piece you move (A-H): ')
-    start_y = input('y: which piece you move (1-8): ')
+    start_x = input('which piece you move (A-H): ')
+    start_y = input('which piece you move (1-8): ')
     start = convert_coordinates(start_x, start_y)
-    end_x = input('x: where you move (A-H): ')
-    end_y = input('y: where you move (1-8): ')
+    end_x = input('where you move (A-H): ')
+    end_y = input('where you move (1-8): ')
     end = convert_coordinates(end_x, end_y)
     game.make_move(start, end)
     game.display_board()
