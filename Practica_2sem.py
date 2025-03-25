@@ -338,8 +338,8 @@ class Game(object):
         self.fields[7][2] = Bishop('black', 'b')
         self.fields[7][5] = Bishop('black', 'b')
         for place in range (1,7):
-          self.fields[1][place] = Pawn('black', 'p')
-          self.fields[6][place] = Pawn('white', 'p')
+          self.fields[1][place] = Pawn('white', 'p')
+          self.fields[6][place] = Pawn('black', 'p')
 
     def display_board(self):
         """Шахматная доска"""
