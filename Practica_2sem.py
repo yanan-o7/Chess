@@ -129,18 +129,18 @@ class Bishop(Figure):
         Returns:
           bool: Допустимость хода.
         """
-        dx = abs(start[0] - end[0])
-        dy = abs(start[1] - end[1])
-        if dx != dy:
+        diag_horiz = abs(start[0] - end[0])
+        diag_vert = abs(start[1] - end[1])
+        if diag_horiz != diag_vert:
             return False
-        sx = 1 if end[0] > start[0] else -1
-        sy = 1 if end[1] > start[1] else -1
-        x, y = start[0] + sx, start[1] + sy
-        while (x, y) != end:
-            if board[x][y]:
+        move_horiz = 1 if end[0] > start[0] else -1
+        move_vert = 1 if end[1] > start[1] else -1
+        coord_1, coord_2 = start[0] + move_horiz, start[1] + move_vert
+        while (coord_1, coord_2) != end:
+            if board[coord_1][coord_2]:
                 return False
-            x += sx
-            y += sy
+            coord_1 += move_horiz
+            coord_2 += move_vert
         return True
 
 class King(Figure):
@@ -192,26 +192,27 @@ class Queen(Figure):
           bool: Допустимость хода.
         """
         if start[0] == end[0]: 
-            for y in range(min(start[1], end[1]) + 1, max(start[1], end[1])):
-                if board[start[0]][y]:
-                    return False
-        elif start[1] == end[1]: 
-            for x in range(min(start[0], end[0]) + 1, max(start[0], end[0])):
-                if board[x][start[1]]:
-                    return False
-        else:
-            dx = abs(start[0] - end[0])
-            dy = abs(start[1] - end[1])
-            if dx != dy:
+          for column in range(start[1] + 1, end[1]):
+             if board[start[0]][column]:
                 return False
-            sx = 1 if end[0] > start[0] else -1
-            sy = 1 if end[1] > start[1] else -1
-            x, y = start[0] + sx, start[1] + sy
-            while (x, y) != end:
-                if board[x][y]:
+        elif start[1] == end[1]: 
+          for row in range(start[0] + 1, end[0]):
+             if board[row][start[1]]:
+                return False
+        
+        else:
+            diag_horiz = abs(start[0] - end[0])
+            diag_vert = abs(start[1] - end[1])
+            if diag_horiz != diag_vert:
+                return False
+            move_horiz = 1 if end[0] > start[0] else -1
+            move_vert = 1 if end[1] > start[1] else -1
+            coord_1, coord_2 = start[0] + move_horiz, start[1] + move_vert
+            while (coord_1, coord_2) != end:
+                if board[coord_1][coord_2]:
                     return False
-                x += sx
-                y += sy
+                coord_1 += move_horiz
+                coord_2 += move_vert
         return True
 
 class Scandic(Figure):
@@ -262,11 +263,9 @@ class Viperr(Figure):
         Returns:
           bool: Допустимость хода.
         """
-        if start[0] == 1 and end[0] == 3 and start[1] == end[1] and not board[2][start[1]] and not board[3][start[1]]:
-          return True
-        elif start[0] + 1 == end[0] and start[1] == end[1] and not board[end[0]][end[1]]:
-          return True
-        return False
+        step_1 = abs(start[0] - end[0])
+        step_2 = abs(start[1] - end[1])
+        return (step_1 == step_2 == 1)
 
 class Timur(Figure):
     """Тимур"""
@@ -412,20 +411,20 @@ class Game(object):
           bool: Нахождение под шахом.
         """
         king_position = None
-        for i in range(8):
-            for j in range(8):
-                if isinstance(self.fields[i][j], King) and self.fields[i][j].color == color:
-                    king_position = (i, j)
+        for coord_1 in range(8):
+            for coord_2 in range(8):
+                if isinstance(self.fields[coord_1][coord_2], King) and self.fields[coord_1][coord_2].color == color:
+                    king_position = (coord_1, coord_2)
                     break
             if king_position:
                 break
         if not king_position:
             return False  
-        for i in range(8):
-            for j in range(8):
-                piece = self.fields[i][j]
+        for coord_1 in range(8):
+            for coord_2 in range(8):
+                piece = self.fields[coord_1][coord_2]
                 if piece and piece.color != color:
-                    if piece.is_valid_move((i, j), king_position, self.fields):
+                    if piece.is_valid_move((coord_1, coord_2), king_position, self.fields):
                         return True  
         return False
 
@@ -441,13 +440,26 @@ class Game(object):
         if not self.is_check(color):
             return False 
         king_position = None
-        for i in range(8):
-            for j in range(8):
-                if isinstance(self.fields[i][j], King) and self.fields[i][j].color == color:
-                    king_position = (i, j)
+        for coord_1 in range(8):
+            for coord_2 in range(8):
+                if isinstance(self.fields[coord_1][coord_2], King) and self.fields[coord_1][coord_2].color == color:
+                    king_position = (coord_1, coord_2)
                     break
             if king_position:
                 break
+        if not king_position:
+            return False
+
+        for coord_1 in range(8):
+            for coord_2 in range(8):
+                piece = self.fields[coord_1][coord_2]
+                if piece and piece.color != color:
+                    if piece.is_valid_move((coord_1, coord_2), king_position, self.fields):
+                        return True
+
+        return False
+
+
             
 def convert_coordinates(coord_1, coord_2):
     coord_1 = ord(coord_1) - ord('A')
