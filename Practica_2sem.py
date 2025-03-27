@@ -372,15 +372,18 @@ class Game(object):
         """
         if self.fields[start[0]][start[1]].color != self.current_turn:
           return False
+            
         if start[0] < 0 or start[0] >= 8 or start[1] < 0 or start[1] >= 8:
             return False
         if end[0] < 0 or end[0] >= 8 or end[1] < 0 or end[1] >= 8:
-            return False        
+            return False  
+            
         if self.validate_move(start, end):
           piece = self.fields[start[0]][start[1]]
           self.fields[start[0]][start[1]] = None
           self.fields[end[0]][end[1]] = piece
           self.count += 1
+            
           if isinstance(piece, Pawn) and (end[0] == 0 or end[0] == 7):
             choice = input('which piece do you want the pawn turn into')
             if choice == 'Queen':
@@ -397,6 +400,7 @@ class Game(object):
               self.fields[end[0]][end[1]] = Timur(piece.color, 't')
             elif choice == 'Scandic':
               self.fields[end[0]][end[1]] = Scandic(piece.color, 's')
+                
           self.current_turn = 'black' if self.current_turn == 'white' else 'white'
           return True
         return False
@@ -455,11 +459,8 @@ class Game(object):
                 piece = self.fields[coord_1][coord_2]
                 if piece and piece.color != color:
                     if piece.is_valid_move((coord_1, coord_2), king_position, self.fields):
-                        return True
-
-        return False
-
-
+                        return False
+        return True
             
 def convert_coordinates(coord_1, coord_2):
     coord_1 = ord(coord_1) - ord('A')
